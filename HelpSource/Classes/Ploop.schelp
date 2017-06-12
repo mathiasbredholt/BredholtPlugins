@@ -1,0 +1,29 @@
+TITLE:: Ploop
+summary:: looper style pattern
+categories:: Streams-Patterns-Events>Patterns>Repetition
+related:: Pstutter, Pclutch, Pn
+
+DESCRIPTION::
+Memorizes n values from pattern and repeats. The input pattern is paused until repetition is done and new values are memorized.
+
+
+CLASSMETHODS::
+
+METHOD:: new
+
+ARGUMENT:: pattern
+Input pattern.
+
+ARGUMENT:: n
+Length of sequence to memorize.
+
+ARGUMENT:: repeats
+How many times the sequence is repeated.
+
+EXAMPLES::
+
+code::
+(
+Pbind(\degree, Ploop(Pwhite(0, 7), 4, 4)).play;
+)
+::

@@ -1,0 +1,27 @@
+TITLE:: Pgroove
+summary:: micro rhythm pattern
+categories:: Streams-Patterns-Events>Patterns>List
+
+DESCRIPTION::
+Implementation of micro rhythm patterns.
+
+CLASSMETHODS::
+
+METHOD:: new
+
+ARGUMENT:: shape
+Shape of binary micro rhythm. If phrase = 1, this will be the output rhythm.
+
+ARGUMENT:: phrase
+Between 0..1. Relation between straight rhythm and rhythm passed as shape. For example [ 1, 0, 1, 1 ] will output [ 4/3, 4/3, 4/3 ] for phrase = 0 and [ 2, 1, 1 ] for phrase = 1.
+
+ARGUMENT:: repeats
+Number of repetitions.
+
+EXAMPLES::
+
+code::
+(
+Pbind(\dur, Pgroove([1, 0, 1, 1], 0.3), \degree, Pseq([0, 1, 2], inf)).play
+)
+::
