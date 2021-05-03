@@ -21,7 +21,7 @@ Pgroove : Pattern {
                     var input = [], output = [], seq = [], outval, pseq;
 
                     // Force shape to be binary
-                    sh = (sh > 0).asInt;
+                    sh = (sh > 0).asInteger;
                     // Force phrase to range 0..1
                     ph = ph.clip(0.0, 1.0);
 

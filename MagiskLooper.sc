@@ -4,37 +4,35 @@
 MagiskLooper {
 	var win,s,t;
 	var children,focus;
-	var latency,<locked,recording,<synced,muted,metro;
+	var <locked, recording, <synced, muted, metro;
 	var newBtn,recBtn,syncBtn,lockBtn,latBox;
 
-	*new {|newLatency = 2048,numChannels = 0,args,isLocked = false|
-		^super.new.init(newLatency,numChannels,args,isLocked);
+	*new {|numChannels = 0,args,isLocked = false|
+		^super.new.init(numChannels,args,isLocked);
 	}
 
-	init {|newLatency,numChannels,args,isLocked|
+	init {|numChannels,args,isLocked|
 		s = Server.default;
 		t = TempoClock.default;
 
 		children = List.new;
 		focus = nil;
-		latency = newLatency;
 		locked = isLocked;
 		recording = false;
 		synced = false;
 		muted = false;
 
 		if (s.serverRunning) {
-			SynthDef(\magiskLooper,{|in,out,bufnum,rec=0,play=1,oct=1,rev=1,latency = 2048,length=44100,t_reset,vol=1|
-				var trig,inSig,playhead,recPos,playPos,recRead,sig;
-				trig = Impulse.ar((length/SampleRate.ir).reciprocal);
-				inSig = In.ar(in+Server.default.options.numOutputBusChannels)*EnvGen.kr(Env.adsr(0.1,1,1,0.1),rec);
-				playhead = Phasor.ar(t_reset,BufRateScale.kr(bufnum)*oct*rev,0,length);
-				recPos = (playhead - 9200) % length;
-				recRead = BufRd.ar(1,bufnum,recPos,interpolation:1);
-				BufWr.ar(inSig+recRead,bufnum,recPos);
-				playPos = (playhead - 9200 + latency) % length;
-				sig = BufRd.ar(1,bufnum,playPos);
-				Out.ar(out,sig*EnvGen.kr(Env.adsr(0.05,1,1,0.1),play)*vol);
+			SynthDef(\magiskLooper,{| in, out, bufnum, rec = 0, play = 1, oct = 1, rev = 1, length = 44100, t_reset, vol=1|
+				var inSig, playhead, recPos, recRead, sig, latency;
+				latency = s.options.hardwareBufferSize * 2;
+				inSig = In.ar(in + s.options.numOutputBusChannels) * EnvGen.kr(Env.adsr(0.05, 1, 1, 0.05), rec);
+				playhead = Phasor.ar(0, oct * rev, 0, length);
+				recPos = Wrap.ar(playhead - latency, 0, length);
+				recRead = BufRd.ar(1, bufnum, recPos, interpolation:1);
+				BufWr.ar(inSig + recRead, bufnum, recPos);
+				sig = BufRd.ar(1, bufnum, playhead);
+				Out.ar(out, sig * EnvGen.kr(Env.adsr(0.05, 1, 1, 0.05), play) * vol);
 			}).add;
 
 			SynthDef(\metronome,{|out,freq=440,amp=1|
@@ -66,7 +64,7 @@ MagiskLooper {
 					beats = args[i].[3];
 				};
 
-				AppClock.sched(0.4+i*0.1,{ this.addTrack(label,in,out,beats) });
+				this.addTrack(label,in,out,beats);
 			}
 
 		} {
@@ -88,8 +86,6 @@ MagiskLooper {
 
 	initGUI {
 		var topMenu,midMenu,tempoBox,barBox,countBox,countRout,tempoFunc,countFunc,lblFont;
-		GUI.qt;
-
 		if (this.prStageCheck) {
 			win = View.new(Stage.window,670@115);
 		} {
@@ -99,7 +95,7 @@ MagiskLooper {
 				children.do {|i| i.free }
 			});
 
-			win.view.keyDownAction = {|v,char,mod,uni,key| this.keyDownHandler(uni,mod) };
+			win.view.keyDownAction = {|v, char, mod, uni, key| this.keyDownHandler(uni, mod) };
 		};
 
 		win.addFlowLayout(10@10,5@0);
@@ -171,10 +167,6 @@ MagiskLooper {
 		.string_("COUNTER")
 		.font_(lblFont);
 
-		StaticText(midMenu,60@10)
-		.string_("LATENCY")
-		.font_(lblFont);
-
 		midMenu.decorator.nextLine;
 
 		tempoBox = StaticText(midMenu,60@20)
@@ -184,7 +176,7 @@ MagiskLooper {
 		.stringColor_(Color.black);
 
 		barBox = StaticText(midMenu,60@20)
-		.string_(t.beatsPerBar)
+		.string_(t.beatsPerBar.asInt.asString ++ "/" ++ "4")
 		.align_(\center)
 		.background_(Color.white)
 		.stringColor_(Color.black);
@@ -194,17 +186,6 @@ MagiskLooper {
 		.align_(\center)
 		.background_(Color.white)
 		.stringColor_(Color.black);
-
-		latBox = NumberBox(midMenu,60@20)
-		.background_(Color.white)
-		.stringColor_(Color.black)
-		.clipLo_(0)
-		.align_(\center)
-		.value_(latency)
-		.enabled_(locked.not)
-		.action_({|v|
-			this.setLatency(v.value);
-		});
 
 		View.new(win,650@1)
 		.background_(Color.grey(0.5));
@@ -237,8 +218,8 @@ MagiskLooper {
 				loop {
 					{
 						tempoBox.string = t.tempo * 60;
-						barBox.string = t.beatsPerBar;
-						countBox.string = (b + 1).asString
+						barBox.string = t.beatsPerBar.asInt.asString ++ "/" ++ "4";
+						countBox.string = (b + 1).asInt.asString
 					}.defer;
 					b = ((b + 1) % t.beatsPerBar);
 					1.wait;
@@ -254,7 +235,7 @@ MagiskLooper {
 		if (label.isNil) {
 			label = ("track" ++ (newId+1)).asString;
 		};
-		children.add(MLTrack.new(this,newId,win,latency,label,in,out,beats));
+		children.add(MLTrack.new(this,newId,win,label,in,out,beats));
 		if (focus.isNil) {
 			this.setFocus(0);
 		}
@@ -274,7 +255,6 @@ MagiskLooper {
 	}
 
 	lock {|value|
-		latBox.enabled = value.not;
 		children.do {|i|
 			i.lock(value);
 		};
@@ -292,12 +272,6 @@ MagiskLooper {
 		synced = value;
 	}
 
-	setLatency {|value|
-		children.do {|i|
-			i.setLatency(value);
-		}
-	}
-
 	keyDownHandler {|uni,mod|
 		if (uni == 27) {
 			lockBtn.valueAction = lockBtn.value.booleanValue.not;
@@ -308,7 +282,7 @@ MagiskLooper {
 					recBtn.valueAction = recording.not;
 				},
 				13, {
-					if (mod == 131072) {
+					if (mod == 31072) {
 						muted = muted.not;
 						children.do {|i|
 							i.muteBtn.valueAction = muted.binaryValue;
@@ -317,8 +291,8 @@ MagiskLooper {
 						children[focus].muteBtn.valueAction = children[focus].muted.not.binaryValue;
 					}
 				},
-				8, {
-					if (mod == 131072) {
+				127, {
+					if (mod == 31072) {
 						children.do {|i|
 							i.clearBtn.valueAction = 1;
 							i.muteBtn.valueAction = 0;
@@ -380,7 +354,7 @@ MagiskLooper {
 		children.do {|i|
 			args.add([i.label.asCompileString,i.in,i.out,i.beats]);
 		};
-		("MagiskLooper.new("+latency+","+children.size+","+args+","+locked+")").postln;
+		("MagiskLooper.new("+children.size+","+args+","+locked+")").postln;
 	}
 
 	metronome {|value|
@@ -394,13 +368,13 @@ MagiskLooper {
 }
 
 MLTrack {
-	var parent,<id,win,latency,<label,<in,<out,<beats;
+	var parent,<id,win,<label,<in,<out,<beats;
 	var s,t;
 	var <muted,buffer,synth,recording,oct,rev,label;
 	var focusBtn,<muteBtn,<clearBtn,inBox,outBox,beatsBox,lblBox;
 
-	*new {|parent,id,win,latency,newLabel,newIn,newOut,newBeats|
-		^super.newCopyArgs(parent,id,win,latency,newLabel,newIn,newOut,newBeats).init;
+	*new {|parent,id,win,newLabel,newIn,newOut,newBeats|
+		^super.newCopyArgs(parent,id,win,newLabel,newIn,newOut,newBeats).init;
 	}
 
 	init {
@@ -410,18 +384,16 @@ MLTrack {
 		muted = false;
 		oct = 1;
 		rev = 1;
-
-		buffer = Buffer.alloc(s,s.sampleRate*30,1);
-		synth = Synth(\magiskLooper,[\in,in,\out,out,\bufnum,buffer,\length,t.tempo.reciprocal*beats*s.sampleRate,\latency,latency]);
-
+		fork {
+			buffer = Buffer.alloc(s,s.sampleRate*30,1);
+			s.sync;
+			synth = Synth(\magiskLooper,[\in,in,\out,out,\bufnum,buffer,\length, beats * s.sampleRate / t.tempo]);
+		};
 		this.initGUI;
 	}
 
 	initGUI {
 		var lblFont;
-
-		GUI.qt;
-
 		lblFont = Font.default;
 		lblFont.size = 10;
 
@@ -479,7 +451,7 @@ MLTrack {
 		.canFocus_(false)
 		.action_({|v|
 			CCMapper.view = v;
-			this.mute(v.value.booleanValue,parent.synced);
+			this.mute(v.value.booleanValue, parent.synced);
 		});
 
 		clearBtn = Button.new(win,60@20)
@@ -533,9 +505,9 @@ MLTrack {
 		.action_({
 			Dialog.savePanel({|path|
 				var length;
-				length = t.tempo.reciprocal*beats*s.sampleRate;
-				buffer.write(path++".aiff","AIFF","int16",length);
-			})
+				length = beats * s.sampleRate / t.tempo;
+				buffer.write(path++".wav", "WAV", "int24", length);
+			}, path: Platform.recordingsDir ++ "/" ++ label)
 		});
 	}
 
@@ -604,14 +576,9 @@ MLTrack {
 		}
 	}
 
-	setLatency {|value|
-		latency = value;
-		this.update;
-	}
-
 	update {
-		var length = t.tempo.reciprocal*beats*s.sampleRate;
-		synth.set(\in,in,\out,out,\length,length,\play,muted.not,\rec,recording,\oct,oct,\rev,rev,\latency,latency);
+		var length = beats * s.sampleRate / t.tempo;
+		synth.set(\in, in, \out, out, \length, length, \play, muted.not, \rec, recording,\oct, oct, \rev, rev);
 	}
 
 	free {
