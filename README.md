@@ -1,3 +1,9 @@
-SuperCollider plugins
+# Bredholt collection of SuperCollider extensions
 
-Phaser is not made by me
+## Building
+```
+mkdir -p build && cd build
+cmake ..
+cmake --build . --target install
+```
+

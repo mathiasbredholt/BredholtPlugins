@@ -1,0 +1,47 @@
+TITLE:: Glitch
+summary:: Glitches value in range lo to hi
+categories:: UGens>Random
+
+DESCRIPTION::
+Randomly glitches parameter in range lo to hi with probability.
+
+CLASSMETHODS::
+
+METHOD:: ar
+
+ARGUMENT:: in
+Input parameter.
+
+ARGUMENT:: lo
+Lower range.
+
+ARGUMENT:: hi
+Higher range.
+
+ARGUMENT:: glitchFreq
+Glitch frequency.
+
+ARGUMENT:: prob
+Probability of glitches
+
+ARGUMENT:: curve
+Curvature of mapping.
+
+EXAMPLES::
+
+code::
+(
+{
+  var freq = Glitch.ar(in: 100, lo: 20, high: 20e3, glitchFreq: 100, prob: 0.05);
+  Splay.ar(Saw.ar(freq)) * 0.1;
+}.play
+)
+
+// Stereorize glitchFreq
+(
+{
+  var freq = Glitch.ar(in: 100, lo: 20, high: 20e3, glitchFreq: 100 ! 2, prob: 0.05);
+  Splay.ar(Saw.ar(freq)) * 0.1;
+}.play
+)
+::

@@ -1,3 +1,6 @@
 [submodule "PV_RandPhase.git"]
-	path = PV_RandPhase
+	path = Plugins/PV_RandPhase
 	url = git@github.com:mathiasbredholt/PV_RandPhase.git
+[submodule "supercollider"]
+	path = supercollider
+	url = git@github.com:supercollider/supercollider.git
