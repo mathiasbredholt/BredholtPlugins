@@ -17,7 +17,7 @@ MPhaser {
 
 Phaser1 {
 
-	*ar { arg input, depth = 0.5, rate = 1, fb = 0.3, cfb = 0.1, rot = 0.5pi;
+	*ar { arg input, depth = 0.5, rate = 1, fb = 0.3, cfb = 0.1, rot = 0.5;
 		var output, lfo, feedback, ac;
 
 		// compute allpass coefficient
@@ -27,7 +27,7 @@ Phaser1 {
 			a1;
 		};
 
-		lfo = [0, rot] collect: { |w| SinOsc.ar(rate, w).range(0, 1) };
+		lfo = [0, rot] collect: { |w| SinOsc.ar(rate, w * pi).range(0, 1) };
 		feedback = LocalIn.ar(2);
 		output = input + (feedback*fb) + (feedback.reverse*cfb);
 		[[16, 1600], [33, 3300], [48, 4800], [98, 9800], [160, 16000], [260, 22050]] do: { |freqs|
@@ -44,7 +44,7 @@ Phaser1 {
 
 Phaser2 {
 
-	*ar { arg input, depth = 0.5, rate = 1, fb = 0.3, cfb = 0.1, rot = 0.5pi, rq = 1;
+	*ar { arg input, depth = 0.5, rate = 1, fb = 0.3, cfb = 0.1, rot = 0.5, rq = 1;
 		var output, lfo, feedback, ac;
 
 		// compute allpass coefficient
@@ -55,7 +55,7 @@ Phaser2 {
 			[a1, a2];
 		};
 
-		lfo = [0, rot] collect: { |w| SinOsc.ar(rate, w).range(0, 1) };
+		lfo = [0, rot] collect: { |w| SinOsc.ar(rate, w * pi).range(0, 1) };
 		feedback = LocalIn.ar(2);
 		output = input + (feedback*fb) + (feedback.reverse*cfb);
 		[[16, 1600], [33, 3300], [48, 4800], [98, 9800], [160, 16000], [260, 22050]] do: { |freqs|

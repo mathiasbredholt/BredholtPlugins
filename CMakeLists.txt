@@ -1,9 +1,9 @@
 cmake_minimum_required(VERSION 3.0.0 FATAL_ERROR)
 
-project(Bredholt)
+project(BredholtPlugins)
 
-set(EXTENSIONS_DIR ${CMAKE_BINARY_DIR}/Bredholt/Extensions)
-set(PLUGINS_DIR ${CMAKE_BINARY_DIR}/Bredholt/Plugins)
+set(EXTENSIONS_DIR ${CMAKE_BINARY_DIR}/BredholtPlugins/Extensions)
+set(PLUGINS_DIR ${CMAKE_BINARY_DIR}/BredholtPlugins/Plugins)
 
 set(SC_PATH ${PROJECT_SOURCE_DIR}/supercollider)
 
