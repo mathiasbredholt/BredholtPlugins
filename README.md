@@ -1,4 +1,4 @@
-# Bredholt collection of SuperCollider extensions
+# BredholtPlugins
 
 ## Building
 ```
