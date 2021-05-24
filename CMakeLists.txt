@@ -8,5 +8,6 @@ set(PLUGINS_DIR ${CMAKE_BINARY_DIR}/BredholtPlugins/Plugins)
 set(SC_PATH ${PROJECT_SOURCE_DIR}/supercollider)
 
 add_subdirectory(Plugins/PV_RandPhase)
+add_subdirectory(Plugins/MonoPhaser)
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Extensions/ DESTINATION ${EXTENSIONS_DIR})

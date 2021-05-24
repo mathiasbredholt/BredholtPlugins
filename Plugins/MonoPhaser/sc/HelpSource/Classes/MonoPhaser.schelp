@@ -1,0 +1,18 @@
+TITLE:: MonoPhaser
+summary:: Phaser effect
+categories:: UGens->Filters
+
+DESCRIPTION::
+Phaser effect ported from FAUST
+
+CLASSMETHODS::
+private:: categories
+
+EXAMPLES::
+code::
+(
+Ndef(\phaser, {
+  MonoPhaser.ar(Saw.ar(8), depth: 2.5, fb: 0.99, phase: [0, 0.5], rate: [5, 3]) * 0.2;
+}).play;
+)
+::
