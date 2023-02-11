@@ -8,6 +8,10 @@ set(PLUGINS_DIR ${CMAKE_BINARY_DIR}/BredholtPlugins/Plugins)
 set(SC_PATH ${PROJECT_SOURCE_DIR}/supercollider)
 
 add_subdirectory(Plugins/PV_RandPhase)
-add_subdirectory(Plugins/MonoPhaser)
+
+option(HAS_FAUST "Build Faust plugins" OFF)
+if (HAS_FAUST)
+  add_subdirectory(Plugins/MonoPhaser)
+endif()
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Extensions/ DESTINATION ${EXTENSIONS_DIR})

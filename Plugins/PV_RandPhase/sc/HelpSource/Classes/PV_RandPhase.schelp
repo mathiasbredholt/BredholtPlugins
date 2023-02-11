@@ -1,0 +1,24 @@
+TITLE:: PV_RandPhase
+summary:: Randomizes phase
+categories:: UGens>FFT
+
+DESCRIPTION::
+Randomizes phase of each bin in the FFT.
+
+CLASSMETHODS::
+private:: categories
+
+EXAMPLES::
+code::
+(
+// Spectral reverb
+{
+  var sig, chain;
+  sig = SinOsc.ar(200 * Duty.kr(0.25, 0, Diwhite(1, 8))) * 0.5;
+  chain = FFT(LocalBuf(8192), sig);
+  chain = PV_MagSmooth(chain, 0.9);
+  chain = PV_RandPhase(chain);
+  sig + (IFFT(chain).dup * 0.5)
+}.play;
+)
+::
