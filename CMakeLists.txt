@@ -15,3 +15,8 @@ if (HAS_FAUST)
 endif()
 
 install(DIRECTORY ${PROJECT_SOURCE_DIR}/Extensions/ DESTINATION ${EXTENSIONS_DIR})
+
+option(HAS_QT "Build GUI plugins" OFF)
+if (HAS_QT)
+  install(DIRECTORY ${PROJECT_SOURCE_DIR}/GuiExtensions/ DESTINATION ${EXTENSIONS_DIR})
+endif()
